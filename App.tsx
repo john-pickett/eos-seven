@@ -1,9 +1,28 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, Modal } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  Modal,
+  Animated,
+} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useGameStore } from './src/store/useGameStore';
+import { useGameStore, Inventory } from './src/store/useGameStore';
 import { MARIA_PERSONALITIES } from './src/store/mariaPersonalities';
+import ACTIONS from './src/data/actions.json';
+
+const AVAILABLE_ACTIONS: ActionMetadata[] = ACTIONS as ActionMetadata[];
+
+interface ActionMetadata {
+  id: string;
+  name: string;
+  energyCost: number;
+  duration: number; // in game minutes
+  yield: Partial<Inventory>;
+}
 
 function HomeScreen() {
   const { vitals, time, hasSeenGreetingToday, setHasSeenGreetingToday } =
@@ -38,7 +57,10 @@ function HomeScreen() {
 }
 
 function ActionsScreen() {
-  const { vitals, inventory, setVitals, setInventory } = useGameStore();
+  const { vitals, inventory, setVitals, setInventory, advanceTime } =
+    useGameStore();
+  const [current, setCurrent] = useState<ActionMetadata | null>(null);
+  const progress = useRef(new Animated.Value(0)).current;
 
   const handleEat = () => {
     if (inventory.food > 0) {
@@ -54,11 +76,62 @@ function ActionsScreen() {
     }
   };
 
+  const performAction = (action: ActionMetadata) => {
+    if (current || vitals.energy < action.energyCost) return;
+    setCurrent(action);
+    progress.setValue(0);
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: action.duration * 1000,
+      useNativeDriver: false,
+    }).start(() => {
+      const updates: Partial<Inventory> = {};
+      (Object.keys(action.yield) as (keyof Inventory)[]).forEach((key) => {
+        updates[key] = inventory[key] + (action.yield[key] ?? 0);
+      });
+      setInventory(updates);
+      setVitals({ energy: Math.max(0, vitals.energy - action.energyCost) });
+      advanceTime(action.duration);
+      setCurrent(null);
+    });
+  };
+
   return (
     <View style={styles.container}>
-      <Text>Actions Screen</Text>
+      <Text style={{ marginBottom: 10 }}>Actions Screen</Text>
+      {AVAILABLE_ACTIONS.map((action) => (
+        <View key={action.id} style={{ marginVertical: 5 }}>
+          <Text>{action.name}</Text>
+          <Text>
+            Cost: {action.energyCost} energy, Duration: {action.duration}m
+          </Text>
+          <Button
+            title="Perform"
+            onPress={() => performAction(action)}
+            disabled={!!current || vitals.energy < action.energyCost}
+          />
+        </View>
+      ))}
       <Button title="Eat Food" onPress={handleEat} />
       <Button title="Drink Water" onPress={handleDrink} />
+      {current && (
+        <View style={{ marginTop: 20, alignItems: 'center' }}>
+          <Text>Performing {current.name}...</Text>
+          <View style={styles.progressContainer}>
+            <Animated.View
+              style={[
+                styles.progressBar,
+                {
+                  width: progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0%', '100%'],
+                  }),
+                },
+              ]}
+            />
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -115,5 +188,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  progressContainer: {
+    height: 10,
+    width: '80%',
+    backgroundColor: '#eee',
+    borderRadius: 5,
+    overflow: 'hidden',
+    marginTop: 5,
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#4caf50',
   },
 });

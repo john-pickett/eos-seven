@@ -1,0 +1,16 @@
+[
+  {
+    "id": "salvage",
+    "name": "Salvage",
+    "energyCost": 15,
+    "duration": 5,
+    "yield": { "metal": 2, "wires": 1 }
+  },
+  {
+    "id": "harvest",
+    "name": "Harvest",
+    "energyCost": 10,
+    "duration": 4,
+    "yield": { "food": 1, "water": 1 }
+  }
+]
