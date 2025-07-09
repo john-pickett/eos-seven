@@ -74,7 +74,7 @@ export default function ActionsScreen() {
       <Button title="Eat Food" onPress={handleEat} />
       <Button title="Drink Water" onPress={handleDrink} />
       {current && (
-        <View style={{ marginTop: 20, alignItems: 'center' }}>
+        <View style={{ marginTop: 20, alignItems: 'center', width: '100%' }}>
           <Text>Performing {current.name}...</Text>
           <View style={styles.progressContainer}>
             <Animated.View
