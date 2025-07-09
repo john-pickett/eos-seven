@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   progressContainer: {
-    height: 10,
+    height: 30,
     width: '80%',
     backgroundColor: '#eee',
     borderRadius: 5,
