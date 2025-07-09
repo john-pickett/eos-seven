@@ -1,14 +1,32 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button } from 'react-native';
+import { StyleSheet, Text, View, Button, Modal } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useGameStore } from './store/useGameStore';
+import { MARIA_PERSONALITIES } from './store/mariaPersonalities';
 
 function HomeScreen() {
-  const { vitals, time } = useGameStore();
+  const { vitals, time, hasSeenGreetingToday, setHasSeenGreetingToday } =
+    useGameStore();
   const format = (n: number) => n.toString().padStart(2, '0');
+  const personality =
+    MARIA_PERSONALITIES[(time.day - 1) % MARIA_PERSONALITIES.length];
   return (
     <View style={styles.container}>
+      <Modal visible={!hasSeenGreetingToday} transparent animationType="slide">
+        <View style={[styles.container, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+          <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 8 }}>
+            <Text style={{ marginBottom: 10 }}>
+              Good morning! I am MARIA, your {personality.description}. Today
+              MARIA stands for {personality.acronym}.
+            </Text>
+            <Button
+              title="Continue"
+              onPress={() => setHasSeenGreetingToday(true)}
+            />
+          </View>
+        </View>
+      </Modal>
       <Text>Energy: {vitals.energy}</Text>
       <Text>Hunger: {vitals.hunger}</Text>
       <Text>Thirst: {vitals.thirst}</Text>
