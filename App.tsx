@@ -2,8 +2,8 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button, Modal } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useGameStore } from './store/useGameStore';
-import { MARIA_PERSONALITIES } from './store/mariaPersonalities';
+import { useGameStore } from './src/store/useGameStore';
+import { MARIA_PERSONALITIES } from './src/store/mariaPersonalities';
 
 function HomeScreen() {
   const { vitals, time, hasSeenGreetingToday, setHasSeenGreetingToday } =
@@ -17,8 +17,7 @@ function HomeScreen() {
         <View style={[styles.container, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
           <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 8 }}>
             <Text style={{ marginBottom: 10 }}>
-              Good morning! I am MARIA, your {personality.description}. Today
-              MARIA stands for {personality.acronym}.
+              Good morning! I am MARIA, your {personality.acronym}.
             </Text>
             <Button
               title="Continue"
