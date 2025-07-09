@@ -50,7 +50,21 @@ export const useGameStore = create<GameState>((set) => ({
       minute = minute % 60;
       let day = state.time.day + Math.floor(hour / 24);
       hour = hour % 24;
-      const newState: Partial<GameState> = { time: { day, hour, minute } };
+
+      const hungerIncrease = (minutes / (4 * 60)) * 5;
+      const thirstIncrease = (minutes / (4 * 60)) * 10;
+      let hunger = Math.min(100, state.vitals.hunger + hungerIncrease);
+      let thirst = Math.min(100, state.vitals.thirst + thirstIncrease);
+
+      let health = state.vitals.health;
+      if (hunger >= 100 || thirst >= 100) {
+        health = Math.max(0, health - (minutes / 60) * 5);
+      }
+
+      const newState: Partial<GameState> = {
+        time: { day, hour, minute },
+        vitals: { ...state.vitals, hunger, thirst, health },
+      };
       if (day !== state.time.day) {
         newState.hasSeenGreetingToday = false;
       }
