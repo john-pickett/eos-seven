@@ -1,36 +1,77 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Button } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useGameStore } from './store/useGameStore';
 
 function HomeScreen() {
+  const { vitals, time } = useGameStore();
+  const format = (n: number) => n.toString().padStart(2, '0');
   return (
     <View style={styles.container}>
-      <Text>Home Screen</Text>
+      <Text>Energy: {vitals.energy}</Text>
+      <Text>Hunger: {vitals.hunger}</Text>
+      <Text>Thirst: {vitals.thirst}</Text>
+      <Text>Health: {vitals.health}</Text>
+      <Text>
+        Day {time.day} {format(time.hour)}:{format(time.minute)}
+      </Text>
     </View>
   );
 }
 
 function ActionsScreen() {
+  const { vitals, inventory, setVitals, setInventory } = useGameStore();
+
+  const handleEat = () => {
+    if (inventory.food > 0) {
+      setInventory({ food: inventory.food - 1 });
+      setVitals({ hunger: Math.max(0, vitals.hunger - 10) });
+    }
+  };
+
+  const handleDrink = () => {
+    if (inventory.water > 0) {
+      setInventory({ water: inventory.water - 1 });
+      setVitals({ thirst: Math.max(0, vitals.thirst - 10) });
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text>Actions Screen</Text>
+      <Button title="Eat Food" onPress={handleEat} />
+      <Button title="Drink Water" onPress={handleDrink} />
     </View>
   );
 }
 
 function InventoryScreen() {
+  const { inventory } = useGameStore();
   return (
     <View style={styles.container}>
-      <Text>Inventory Screen</Text>
+      <Text>Wires: {inventory.wires}</Text>
+      <Text>Crystals: {inventory.crystals}</Text>
+      <Text>Minerals: {inventory.minerals}</Text>
+      <Text>Metal: {inventory.metal}</Text>
+      <Text>Food: {inventory.food}</Text>
+      <Text>Water: {inventory.water}</Text>
     </View>
   );
 }
 
 function SleepScreen() {
+  const { setVitals, advanceTime } = useGameStore();
+
+  const handleSleep = () => {
+    setVitals({ energy: 100 });
+    advanceTime(8 * 60);
+  };
+
   return (
     <View style={styles.container}>
       <Text>Sleep Screen</Text>
+      <Button title="Sleep 8 Hours" onPress={handleSleep} />
     </View>
   );
 }
